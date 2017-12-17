@@ -18,6 +18,6 @@ JavaEE：[InterestingJavaEE](https://github.com/gongchuanjing/InterestingJavaEE.
 
 Struts2：[InterestingStruts2](https://github.com/gongchuanjing/InterestingStruts2.git)
 
-Hibernate：[InterestingStruts2](https://github.com/gongchuanjing/InterestingHibernate.git)
-
 Spring：[InterestingStruts2](https://github.com/gongchuanjing/InterestingSpring.git)
+
+Hibernate：[InterestingStruts2](https://github.com/gongchuanjing/InterestingHibernate.git)
