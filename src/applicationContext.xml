@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+        
+    <!-- spring整合hibernate方式一，很少用这种方式
+    <bean name="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+    	<property name="configLocations" value="classpath:hibernate.cfg.xml" />
+    </bean>
+    -->
+    
+    
+    
+    <!-- spring整合hibernate方式二，不需要hibernate.cfg.xml配置文件了 -->
+    <!-- 加载properties文件 -->
+    <context:property-placeholder location="classpath:db.properties"/>
+    
+    <!-- 配置连接池,c3p0连接 引入外部属性文件properties-->
+    <bean name="c3p0DataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+    	<property name="driverClass" value="${jdbc.driverClass}" />
+		<property name="jdbcUrl" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		
+		<!--连接池中保留的最小连接数。-->    
+        <property name="minPoolSize" value="5" />    
+     
+ 		<!--连接池中保留的最大连接数。Default: 15 -->    
+        <property name="maxPoolSize" value="10" />    
+     
+		<!--初始化时获取的连接数，取值应在minPoolSize与maxPoolSize之间。Default: 3 -->    
+        <property name="initialPoolSize" value="2" />    
+     
+ 		<!--最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0 -->    
+        <property name="maxIdleTime" value="60" />    
+     
+ 		<!--当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。Default: 3 -->    
+        <property name="acquireIncrement" value="2" />    
+    </bean>
+    
+    <bean name="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+    	<!-- 加载连接池 -->
+    	<property name="dataSource" ref="c3p0DataSource" />
+    	
+    	<property name="hibernateProperties" >
+    		<!-- 以下属性在书写时不能省略hibernate 
+    		<props>
+    			<prop key="hibernate.show_sql">true</prop>
+    			<prop key="hibernate.format_sql">true</prop>
+    			<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+    			<prop key="hibernate.hbm2ddl.auto">update</prop>
+    		</props>
+    		-->
+			<!-- 上述的配置可以简写成以下 -->
+			<value>
+				hibernate.show_sql=true
+				hibernate.format_sql=true
+				hibernate.dialect=org.hibernate.dialect.MySQLDialect
+				hibernate.hbm2ddl.auto=update
+			</value>
+    	</property>
+    	
+    	<!-- 加载hibernate的Xxx.hbm.xml配置文件 -->
+    	<property name="mappingResources">	<!-- 它类似于我们之前<mapping resource=””> -->
+    		<list>
+    			<value>tk/chuanjing/ssh_xml/domain/User.hbm.xml</value>
+    		</list>
+    	</property>
+    	<!--
+    	<property name="mappingLocations">	它加载时是根据类路径加载 classpath:路径
+    		<list>
+    			<value>classpath:tk/chuanjing/ssh_xml/domain/User.hbm.xml</value>
+    		</list>
+    	</property>
+    	<property name="mappingDirectoryLocations">	它加载目录
+    		<list>
+    			<value>classpath:tk/chuanjing/ssh_xml/domain</value>
+    		</list>
+    	</property>
+    	-->
+    </bean>
+    
+    <!-- 声明dao -->
+    <bean name="userDao" class="tk.chuanjing.ssh_xml.dao.UserDAOImpl">
+    	<property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+    
+    <!-- 声明service -->
+    <bean name="userService" class="tk.chuanjing.ssh_xml.service.UserServiceImpl">
+    	<property name="userDao" ref="userDao" />
+    </bean>
+    
+    
+    <!-- 声明式事务管理 -->
+	<!-- 事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<!-- 通知 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="find*" read-only="true"/>
+			<tx:method name="add"/>
+			<tx:method name="update"/>
+			<tx:method name="del"/>
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- 切面 -->
+	<aop:config>
+		<aop:pointcut expression="execution(* tk.chuanjing.ssh_xml.service.*..*(..))" id="mypointcut"/>
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="mypointcut"/>
+	</aop:config>
+	
+	<!-- spring整合struts2框架方式一 ，配置action，
+		 如果采用的是spring管理action这种方案我们必须在<bean>声明中添加scope=prototype”,
+		 原因是struts2框架的action每一次请求都应该是一个新的action
+	<bean name="userAction" class="tk.chuanjing.ssh_xml.action.UserAction" scope="prototype">
+		<property name="userService" ref="userService" />
+	</bean>
+	-->
+</beans>

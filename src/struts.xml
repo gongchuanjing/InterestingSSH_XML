@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+	
+<struts>
+
+	<!-- spring整合struts2框架方式一 
+	<package name="default" namespace="/" extends="struts-default">
+		<action name="user_*" class="userAction" method="{1}">
+			<result name="success">/success.jsp</result>
+		</action>
+	</package>
+	-->
+	
+	
+	<!-- spring整合struts2框架方式二 -->
+	
+	<!-- 在default.properties中有一段配置  value="name",这时就会根据名称进行autoWires，
+		  我们可以修改注入的方式为   value="type"   根据type进行注入
+	-->
+	<constant name="struts.objectFactory.spring.autoWire" value="type" />
+
+	<package name="default" namespace="/" extends="struts-default">
+		
+		<action name="user_*" class="tk.chuanjing.ssh_xml.action.UserAction" method="{1}">
+			<result name="success">/success.jsp</result>
+		</action>
+		
+	</package>
+</struts>
