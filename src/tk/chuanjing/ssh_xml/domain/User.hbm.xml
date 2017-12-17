@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+    
+<hibernate-mapping>
+	<class name="tk.chuanjing.ssh_xml.domain.User" table="ssh_xml_user">
+		<id name="id">
+			<generator class="identity" />
+		</id>
+		<property name="name" />
+		<property name="age" />
+	</class>
+	
+	<query name="findUserByHQL">
+		from User where id > ?
+	</query>
+	
+	<sql-query name="findUserBySQL">
+		<return class="tk.chuanjing.ssh_xml.domain.User" />
+		select * from ssh_xml_user
+	</sql-query>
+</hibernate-mapping>
